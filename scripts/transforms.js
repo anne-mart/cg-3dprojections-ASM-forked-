@@ -39,17 +39,35 @@ function mat4x4Perspective(prp, srp, vup, clip) {
     return transform;
 }
 
-// create a 4x4 matrix to project a perspective image on the z=-1 plane
-function mat4x4MPer() {
+// create a 4x4 matrix to project a perspective image on the z=-1 plane //START HERE
+function mat4x4MPer() { //DONE
     let mper = new Matrix(4, 4);
-    // mper.values = ...;
+
+    //creating mper matrix -- this is always the same.
+    mper.values =  [[1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]];
     return mper;
 }
 
-// create a 4x4 matrix to translate/scale projected vertices to the viewport (window)
-function mat4x4Viewport(width, height) {
+// create a 4x4 matrix to translate/scale projected vertices to the viewport (window) //START HERE
+function mat4x4Viewport(width, height) { //check to see if this is right
     let viewport = new Matrix(4, 4);
     // viewport.values = ...;
+
+    //scale:
+    viewport.values =  [[width, 0, 0, 0],
+                        [0, height, 0, 0],
+                        [0, 0, -1, 0],
+                        [0, 0, 0, 1]];
+
+    //translate:
+    viewport.values =  [[1, 0, 0, width],
+                        [0, 1, 0, height],
+                        [0, 0, 1, -1], //z should be in the fourth spot -- how do we find that / what is it?? -- see if this is right
+                        [0, 0, 0, 1]];
+
     return viewport;
 }
 
@@ -66,34 +84,52 @@ function mat4x4Identity(mat4x4) {
                      [0, 0, 0, 1]];
 }
 
-// set values of existing 4x4 matrix to the translate matrix
-function mat4x4Translate(mat4x4, tx, ty, tz) {
-    // mat4x4.values = ...;
+// set values of existing 4x4 matrix to the translate matrix 
+function mat4x4Translate(mat4x4, tx, ty, tz) { //DONE
+    mat4x4.values = [[1, 0, 0, tx],
+                     [0, 1, 0, ty],
+                     [0, 0, 1, tz],
+                     [0, 0, 0, 1]];
 }
 
 // set values of existing 4x4 matrix to the scale matrix
-function mat4x4Scale(mat4x4, sx, sy, sz) {
-    // mat4x4.values = ...;
+function mat4x4Scale(mat4x4, sx, sy, sz) { //DONE
+    mat4x4.values = [[sx, 0, 0, 0],
+                     [0, sy, 0, 0],
+                     [0, 0, sz, 0],
+                     [0, 0, 0, 1]];
 }
 
 // set values of existing 4x4 matrix to the rotate about x-axis matrix
-function mat4x4RotateX(mat4x4, theta) {
-    // mat4x4.values = ...;
+function mat4x4RotateX(mat4x4, theta) { //DONE
+    mat4x4.values = [[1, 0, 0, 0],
+                     [0, Math.cos(theta), -Math.sin(theta), 0],
+                     [0, Math.sin(theta), Math.cos(theta), 0],
+                     [0, 0, 0, 1]];
 }
 
 // set values of existing 4x4 matrix to the rotate about y-axis matrix
-function mat4x4RotateY(mat4x4, theta) {
-    // mat4x4.values = ...;
+function mat4x4RotateY(mat4x4, theta) { //DONE
+    mat4x4.values = [[Math.cos(theta), 0, Math.sin(theta), 0],
+                     [0, 1, 0, 0],
+                     [-Math.sin(theta), 0, Math.cos(theta), 0],
+                     [0, 0, 0, 1]];
 }
 
 // set values of existing 4x4 matrix to the rotate about z-axis matrix
-function mat4x4RotateZ(mat4x4, theta) {
-    // mat4x4.values = ...;
+function mat4x4RotateZ(mat4x4, theta) { //DONE
+    mat4x4.values = [[Math.cos(theta),-Math.sin(theta), 0, 0],
+                     [Math.sin(theta), Math.cos(theta), 0, 0],
+                     [0, 0, 1, 0],
+                     [0, 0, 0, 1]];
 }
 
 // set values of existing 4x4 matrix to the shear parallel to the xy-plane matrix
-function mat4x4ShearXY(mat4x4, shx, shy) {
-    // mat4x4.values = ...;
+function mat4x4ShearXY(mat4x4, shx, shy) { //DONE
+    mat4x4.values = [[1,0, shx, 0],
+                     [0, 1, shy, 0],
+                     [0, 0, 1, 0],
+                     [0, 0, 0, 1]];
 }
 
 // create a new 3-component vector with values x,y,z

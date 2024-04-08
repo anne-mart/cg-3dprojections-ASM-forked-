@@ -71,6 +71,12 @@ class Renderer {
         //     * project to 2D
         //     * translate/scale to viewport (i.e. window)
         //     * draw line
+
+        let points = new Vector(4);
+        points.values = this.scene.models[0].vertices[0].data;
+        console.log(points);
+        //points = Matrix.multiply(CG.)
+
     }
 
     // Get outcode for a vertex

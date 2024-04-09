@@ -71,11 +71,31 @@ class Renderer {
         //     * project to 2D
         //     * translate/scale to viewport (i.e. window)
         //     * draw line
+        let points = [];
+        let perspective = this.scene.view;
+        let perspective_mat = CG.mat4x4Perspective(perspective.prp, perspective.srp, perspective.vup, perspective.clip);
+        let veiw_mat = CG.mat4x4Viewport(this.canvas.width, this.canvas.height);
+        //console.log(perspective_mat);
+        for(let i = 0; i < this.scene.models[0].vertices.length; i++) {
+            let point = new Vector(4);
+            point.values = this.scene.models[0].vertices[i].data;
+            point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), perspective_mat, point]);
+            let x = point.values[0] / point.values[3];
+            let y = point.values[1] / point.values[3];
+            point.values[0][0] = x;
+            point.values[1][0] = y;
+            points[i] = point;
+        }
 
-        let points = new Vector(4);
-        points.values = this.scene.models[0].vertices[0].data;
-        console.log(points);
-        //points = Matrix.multiply(CG.)
+        //console.log(this.canvas.height);
+
+        for(let i = 0; i < this.scene.models[0].edges.length; i++) {
+            let edge = this.scene.models[0].edges[i];
+            //console.log(edge);
+            for(let j = 0; j < edge.length - 1; j++) {
+                this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
+            }
+        }
 
     }
 
@@ -184,7 +204,7 @@ class Renderer {
                 }
             }
             else {
-                model.center = Vector4(scene.models[i].center[0],
+                model.center = CG.Vector4(scene.models[i].center[0],
                                        scene.models[i].center[1],
                                        scene.models[i].center[2],
                                        1);

@@ -71,15 +71,21 @@ class Renderer {
         //     * project to 2D
         //     * translate/scale to viewport (i.e. window)
         //     * draw line
-        let points = [];
-        let perspective = this.scene.view;
-        let perspective_mat = CG.mat4x4Perspective(perspective.prp, perspective.srp, perspective.vup, perspective.clip);
-        let veiw_mat = CG.mat4x4Viewport(this.canvas.width, this.canvas.height);
-        //console.log(perspective_mat);
+        let points = []; //list of points after all calculations
+        let perspective = this.scene.view; //loading view data from scene
+        let perspective_mat = CG.mat4x4Perspective(perspective.prp, perspective.srp, perspective.vup, perspective.clip); // perspective matrix
+        let veiw_mat = CG.mat4x4Viewport(this.canvas.width, this.canvas.height); //view matrix
+
         for(let i = 0; i < this.scene.models[0].vertices.length; i++) {
             let point = new Vector(4);
-            point.values = this.scene.models[0].vertices[i].data;
-            point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), perspective_mat, point]);
+            point.values = this.scene.models[0].vertices[i].data; //grab one vertex
+            point = Matrix.multiply([perspective_mat, point]); //multiply perspective matrix with vertex
+
+            //do clipping here
+
+            point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), point]); //project to 2D and translate/scale
+
+            //convert to cartesian coords
             let x = point.values[0] / point.values[3];
             let y = point.values[1] / point.values[3];
             point.values[0][0] = x;
@@ -87,11 +93,12 @@ class Renderer {
             points[i] = point;
         }
 
-        //console.log(this.canvas.height);
-
+        
+        //draw lines
         for(let i = 0; i < this.scene.models[0].edges.length; i++) {
-            let edge = this.scene.models[0].edges[i];
-            //console.log(edge);
+            let edge = this.scene.models[0].edges[i]; //gets one edge
+            
+            //draw edge
             for(let j = 0; j < edge.length - 1; j++) {
                 this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
             }

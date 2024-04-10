@@ -61,7 +61,8 @@ class Renderer {
     //
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+        console.log(this.scene);
+        //console.log(this.scene.view);
         // TODO: implement drawing here!
         // For each model
         //   * For each vertex
@@ -75,32 +76,33 @@ class Renderer {
         let perspective = this.scene.view; //loading view data from scene
         let perspective_mat = CG.mat4x4Perspective(perspective.prp, perspective.srp, perspective.vup, perspective.clip); // perspective matrix
         let veiw_mat = CG.mat4x4Viewport(this.canvas.width, this.canvas.height); //view matrix
+        for(let n = 0; n < this.scene.models.length; n++) {
+            for(let i = 0; i < this.scene.models[n].vertices.length; i++) {
+                let point = new Vector(4);
+                point.values = this.scene.models[n].vertices[i].data; //grab one vertex
+                point = Matrix.multiply([perspective_mat, point]); //multiply perspective matrix with vertex
 
-        for(let i = 0; i < this.scene.models[0].vertices.length; i++) {
-            let point = new Vector(4);
-            point.values = this.scene.models[0].vertices[i].data; //grab one vertex
-            point = Matrix.multiply([perspective_mat, point]); //multiply perspective matrix with vertex
+                //do clipping here
 
-            //do clipping here
+                point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), point]); //project to 2D and translate/scale
 
-            point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), point]); //project to 2D and translate/scale
+                //convert to cartesian coords
+                let x = point.values[0] / point.values[3];
+                let y = point.values[1] / point.values[3];
+                point.values[0][0] = x;
+                point.values[1][0] = y;
+                points[i] = point;
+            }
 
-            //convert to cartesian coords
-            let x = point.values[0] / point.values[3];
-            let y = point.values[1] / point.values[3];
-            point.values[0][0] = x;
-            point.values[1][0] = y;
-            points[i] = point;
-        }
-
-        
-        //draw lines
-        for(let i = 0; i < this.scene.models[0].edges.length; i++) {
-            let edge = this.scene.models[0].edges[i]; //gets one edge
             
-            //draw edge
-            for(let j = 0; j < edge.length - 1; j++) {
-                this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
+            //draw lines
+            for(let i = 0; i < this.scene.models[n].edges.length; i++) {
+                let edge = this.scene.models[n].edges[i]; //gets one edge
+                
+                //draw edge
+                for(let j = 0; j < edge.length - 1; j++) {
+                    this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
+                }
             }
         }
 
@@ -211,15 +213,85 @@ class Renderer {
                 }
             }
             else {
-                model.center = CG.Vector4(scene.models[i].center[0],
-                                       scene.models[i].center[1],
-                                       scene.models[i].center[2],
-                                       1);
-                for (let key in scene.models[i]) {
-                    if (scene.models[i].hasOwnProperty(key) && key !== 'type' && key != 'center') {
-                        model[key] = JSON.parse(JSON.stringify(scene.models[i][key]));
+                if (model.type === 'cube') {
+                    model.vertices = [];
+                    model.edges = [];
+                    let center = JSON.parse(JSON.stringify(scene.models[i].center));
+                    let x = JSON.parse(JSON.stringify(scene.models[i].width));
+                    let y = JSON.parse(JSON.stringify(scene.models[i].height));
+                    let z = JSON.parse(JSON.stringify(scene.models[i].depth));
+
+                    model.edges.push([0, 1, 2, 3, 0]);
+                    model.edges.push([4, 5, 6, 7, 4]);
+
+                    for(let j = 0; j < 4; j++) {
+                        model.edges.push([model.edges[0][j], model.edges[1][j]]);
+                    }
+
+                    model.vertices.push(CG.Vector4(center[0] - (x / 2), center[1] + (y / 2), center[2] + z / 2, 1));
+                    model.vertices.push(CG.Vector4(center[0] + (x / 2), center[1] + (y / 2), center[2] + z / 2, 1));
+                    model.vertices.push(CG.Vector4(center[0] + (x / 2), center[1] - (y / 2), center[2] + z / 2, 1));
+                    model.vertices.push(CG.Vector4(center[0] - (x / 2), center[1] - (y / 2), center[2] + z / 2, 1));
+
+                    model.vertices.push(CG.Vector4(center[0] - (x / 2), center[1] + (y / 2), center[2] - z / 2, 1));
+                    model.vertices.push(CG.Vector4(center[0] + (x / 2), center[1] + (y / 2), center[2] - z / 2, 1));
+                    model.vertices.push(CG.Vector4(center[0] + (x / 2), center[1] - (y / 2), center[2] - z / 2, 1));
+                    model.vertices.push(CG.Vector4(center[0] - (x / 2), center[1] - (y / 2), center[2] - z / 2, 1));
+
+                    
+                } else if (model.type === 'cylinder') {
+                    let a = 0;
+                    let num_edges = JSON.parse(JSON.stringify(scene.models[i].sides))
+                    let angle = 360 / num_edges;
+                    model.vertices = [];
+                    model.edges = [];
+                    let center = JSON.parse(JSON.stringify(scene.models[i].center));
+                    let r = JSON.parse(JSON.stringify(scene.models[i].radius));
+                    let y = JSON.parse(JSON.stringify(scene.models[i].height));
+                    
+                    let edge_1 = [];
+                    let edge_2 = [];
+                    for(let i = 0; i < num_edges; i++) {
+                        edge_1.push(i);
+                        edge_2.push(i + num_edges);
+                    }
+                    edge_1.push(0);
+                    edge_2.push(num_edges);
+                    model.edges.push(edge_1);
+                    model.edges.push(edge_2);
+
+                    for(let j = 0; j < model.edges[0].length - 1; j++) {
+                        model.edges.push([model.edges[0][j], model.edges[1][j]]);
+                    }
+
+                    for(let i = 0; i < num_edges; i++) {
+                        let x = parseInt(center[0] + r * Math.cos(a * Math.PI / 180));
+                        let z = parseInt(center[2] + r * Math.sin(a * Math.PI / 180));
+                        model.vertices.push(CG.Vector4(x, center[1] + (y / 2), z, 1));
+                        a += angle;
+
+                    }
+                    a = 0;
+                    for(let i = 0; i < num_edges; i++) {
+                        let x = parseInt(center[0] + r * Math.cos(a * Math.PI / 180));
+                        let z = parseInt(center[2] + r * Math.sin(a * Math.PI / 180));
+                        model.vertices.push(CG.Vector4(x, center[1] - (y / 2), z, 1));
+                        a += angle;
                     }
                 }
+
+                if (scene.models[i].hasOwnProperty('animation')) {
+                    model.animation = JSON.parse(JSON.stringify(scene.models[i].animation));
+                }
+                // model.center = CG.Vector4(scene.models[i].center[0],
+                //                        scene.models[i].center[1],
+                //                        scene.models[i].center[2],
+                //                        1);
+                // for (let key in scene.models[i]) {
+                //     if (scene.models[i].hasOwnProperty(key) && key !== 'type' && key != 'center') {
+                //         model[key] = JSON.parse(JSON.stringify(scene.models[i][key]));
+                //     }
+                // }
             }
 
             model.matrix = new Matrix(4, 4);

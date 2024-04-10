@@ -37,7 +37,6 @@ function mat4x4Perspective(prp, srp, vup, clip) {
                     [0, 0, 0, 1]];
 
     let transform = Matrix.multiply([S_per, SH_par, R, T_PRP]);
-    console.log(s);
     return transform;
 }
 

@@ -18,7 +18,7 @@ class Renderer {
         this.canvas.height = canvas.height;
         this.ctx = this.canvas.getContext('2d');
         this.scene = this.processScene(scene);
-        this.enable_animation = false;  // <-- disabled for easier debugging; enable for animation
+        this.enable_animation = true;  // <-- disabled for easier debugging; enable for animation
         this.start_time = null;
         this.prev_time = null;
     }
@@ -30,38 +30,45 @@ class Renderer {
 
     //
     rotateLeft() {
-        
+        console.log(this.scene.view.srp.values[0][0]);
+        let value = this.scene.view.srp.values[0][0] - 1;
+        this.scene.view.srp.values[0][0] = value;
     }
     
     //
     rotateRight() {
-
+        let value = this.scene.view.srp.values[0][0] + 1;
+        this.scene.view.srp.values[0][0] = value;
     }
     
     //
     moveLeft() {
-
+        let value = this.scene.view.prp.values[0][0] + 1;
+        this.scene.view.prp.values[0][0] = value;
     }
     
     //
     moveRight() {
-
+        let value = this.scene.view.prp.values[0][0] - 1;
+        this.scene.view.prp.values[0][0] = value;
     }
     
     //
     moveBackward() {
-
+        let value = this.scene.view.prp.values[2][0] + 1;
+        this.scene.view.prp.values[2][0] = value;
     }
     
     //
     moveForward() {
-
+        let value = this.scene.view.prp.values[2][0] - 1;
+        this.scene.view.prp.values[2][0] = value;
     }
 
     //
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        console.log(this.scene);
+        //console.log(this.scene);
         //console.log(this.scene.view);
         // TODO: implement drawing here!
         // For each model
@@ -377,7 +384,6 @@ class Renderer {
                             }
                         }
                         edge.push(edge[0]);
-                        console.log(edge);
                         model.edges.push(edge);
                     }
                     

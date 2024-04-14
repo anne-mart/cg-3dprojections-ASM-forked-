@@ -30,7 +30,7 @@ class Renderer {
 
     //
     rotateLeft() {
-
+        
     }
     
     //
@@ -241,13 +241,13 @@ class Renderer {
                     
                 } else if (model.type === 'cylinder') {
                     let a = 0;
-                    let num_edges = JSON.parse(JSON.stringify(scene.models[i].sides))
+                    let num_edges = scene.models[i].sides;
                     let angle = 360 / num_edges;
                     model.vertices = [];
                     model.edges = [];
-                    let center = JSON.parse(JSON.stringify(scene.models[i].center));
-                    let r = JSON.parse(JSON.stringify(scene.models[i].radius));
-                    let y = JSON.parse(JSON.stringify(scene.models[i].height));
+                    let center = scene.models[i].center;
+                    let r = scene.models[i].radius;
+                    let y = scene.models[i].height;
                     
                     let edge_1 = [];
                     let edge_2 = [];
@@ -265,19 +265,148 @@ class Renderer {
                     }
 
                     for(let i = 0; i < num_edges; i++) {
-                        let x = parseInt(center[0] + r * Math.cos(a * Math.PI / 180));
-                        let z = parseInt(center[2] + r * Math.sin(a * Math.PI / 180));
+                        let x = center[0] + r * Math.cos(a * Math.PI / 180);
+                        let z = center[2] + r * Math.sin(a * Math.PI / 180);
                         model.vertices.push(CG.Vector4(x, center[1] + (y / 2), z, 1));
                         a += angle;
 
                     }
                     a = 0;
                     for(let i = 0; i < num_edges; i++) {
-                        let x = parseInt(center[0] + r * Math.cos(a * Math.PI / 180));
-                        let z = parseInt(center[2] + r * Math.sin(a * Math.PI / 180));
+                        let x = center[0] + r * Math.cos(a * Math.PI / 180);
+                        let z = center[2] + r * Math.sin(a * Math.PI / 180);
                         model.vertices.push(CG.Vector4(x, center[1] - (y / 2), z, 1));
                         a += angle;
                     }
+
+                } else if (model.type === 'cone') {
+                    let a = 0;
+                    let num_edges = scene.models[i].sides;
+                    let angle = 360 / num_edges;
+                    model.vertices = [];
+                    model.edges = [];
+                    let center = scene.models[i].center;
+                    let r = scene.models[i].radius;
+                    let y = scene.models[i].height;
+                    
+                    let edge_1 = [];
+                    for(let i = 1; i <= num_edges; i++) {
+                        edge_1.push(i);
+                    }
+                    edge_1.push(1);
+                    model.edges.push(edge_1);
+
+                    for(let j = 0; j < model.edges[0].length - 1; j++) {
+                        model.edges.push([0, model.edges[0][j]]);
+                    }
+
+                    model.vertices.push(CG.Vector4(center[0], center[1] + (y / 2), center[2], 1));
+
+                    a = 0;
+                    for(let i = 0; i < num_edges; i++) {
+                        let x = center[0] + r * Math.cos(a * Math.PI / 180);
+                        let z = center[2] + r * Math.sin(a * Math.PI / 180);
+                        model.vertices.push(CG.Vector4(x, center[1] - (y / 2), z, 1));
+                        a += angle;
+                    }
+
+                } else if (model.type === 'sphere') {
+                    let a = 0;
+                    let slices = scene.models[i].slices;
+                    let stacks = scene.models[i].stacks;
+                    let num_points = stacks * 2 ;
+                    let circle_angle = 360 / (num_points);
+                    let sphere_angle = 360 / slices;
+                    model.vertices = [];
+                    model.edges = [];
+                    let center = scene.models[i].center;
+                    let r = scene.models[i].radius;
+
+                    
+                    let num = 0
+                    for(let i = 0; i < num_points; i++) {
+                        let edge_1 = [];
+
+                        for(let j = num; j < num + num_points; j++) {
+                            edge_1.push(j);
+                        }
+                        edge_1.push(num);
+                        num += num_points;
+                        model.edges.push(edge_1);
+                    }
+                    for(let i = 0; i < stacks - 1; i++) {
+                        let edge = [];
+                        let p = i;
+
+                        if (i < stacks / 2) {
+                            for(let j = 0; j < num_points / 2; j++) {
+                                edge.push(p)
+                                p += num_points;
+                            }
+                            
+                            for(let j = 0; j < num_points / 2; j++) {
+                                if(model.edges.length < slices + 1) {
+                                    edge.push(edge[j] + stacks);
+                                } else {
+                                    edge.push(model.edges[model.edges.length - 1][stacks + j] - 1);
+                                    //console.log("h");
+                                } 
+                                
+                                p += num_points;
+                            }
+                        } else {
+                            if (i == stacks / 2 ) {
+                                let temp = model.edges[slices];
+                                for(let j = 0; j < stacks; j++) {
+                                    edge.push(temp[stacks + j] + 1);
+                                }
+                                for(let j = 0; j < stacks - 1; j++) {
+                                    edge.push(temp[j + 1] - 1);
+                                }
+                                edge.push(edge[edge.length - 1] + num_points)
+
+                            } else {
+                                let temp = model.edges[model.edges.length - 1];
+                                for(let j = 0; j < stacks; j++) {
+                                    edge.push(temp[ j] + 1);
+                                }
+                                for(let j = 0; j < stacks - 1; j++) {
+                                    edge.push(temp[stacks + j] - 1);
+                                }
+                                edge.push(edge[edge.length - 1] + num_points)
+                            }
+                        }
+                        edge.push(edge[0]);
+                        console.log(edge);
+                        model.edges.push(edge);
+                    }
+                    
+                    let circle = [];
+                    for(let i = 0; i < num_points; i++) {
+                        let x = center[0] + r * Math.cos(a * Math.PI / 180);
+                        let y = center[1] + r * Math.sin(a * Math.PI / 180);
+                        circle.push(CG.Vector4(x, y , center[2], 1));
+                        a += circle_angle;
+                    }
+                    a = 0;
+                    
+                    let trans1 = new Matrix(4, 4);
+                    trans1 = CG.mat4x4Translate(trans1, center[0] * -1, center[1] * -1, center[2] * -1);
+                    let trans2 = new Matrix(4, 4);
+                    trans2 = CG.mat4x4Translate(trans2, center[0], center[1], center[2]);
+
+                    for(let j = 0; j < slices; j++) {
+                        let rotate = new Matrix(4, 4);
+                        rotate = CG.mat4x4RotateY(rotate, a * Math.PI / 180);
+                        for(let i = 0; i < num_points; i++) {
+                            let point = Matrix.multiply([trans2, rotate, trans1, circle[i]]);
+                            model.vertices.push(point);
+                            
+                        }
+                        a += sphere_angle;
+
+                    }
+
                 }
 
                 if (scene.models[i].hasOwnProperty('animation')) {

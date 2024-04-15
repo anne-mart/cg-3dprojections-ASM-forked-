@@ -85,6 +85,8 @@ let initial_scene = {
     ]
 };
 
+
+
 document.addEventListener('keydown', app.onKeyDown, false);
     
 app.renderer = new Renderer(app.view, initial_scene);

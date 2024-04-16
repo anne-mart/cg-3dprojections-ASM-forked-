@@ -107,11 +107,11 @@ class Renderer {
                 points[i] = point;
             }  
   /////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
-        const points3 = {
-            point0: { x: 200, y: 0},
-            point1: { x: this.canvas.width+1, y: 500}
-        };
-        this.clipLinePerspective(points3, 1);     
+        // const points3 = {
+        //     point0: { x: 200, y: 0},
+        //     point1: { x: this.canvas.width+1, y: 500}
+        // };
+        // this.clipLinePerspective(points3, 1);     
 /////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
             //draw lines
             for(let i = 0; i < this.scene.models[n].edges.length; i++) {

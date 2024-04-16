@@ -26,29 +26,29 @@ class Renderer {
     updateTransforms(time, delta_time) { //NOT DONE/////////////////////////
         // TODO: update any transformations needed for animation
 
-        for(let n = 0; n < this.scene.models.length; n++) {
-            for(let i = 0; i < this.scene.models[n].vertices.length; i++) {
-                        // rotate
-            CG.mat3x3Rotate(this.models.slide1[0].rotate, this.models.slide1[0].theta);
-            // translate to the desired location
-            let tx_1 = this.models.slide1[0].center.values[0][0] + this.models.slide1[0].velocity[0] * delta_time/1000;
-            let ty_1 = this.models.slide1[0].center.values[1][0] + this.models.slide1[0].velocity[1] * delta_time/1000;
-            let tz_1 = this.models.slide1[0].center.values[1][0] + this.models.slide1[0].velocity[1] * delta_time/1000;
+        // for(let n = 0; n < this.scene.models.length; n++) {
+        //     for(let i = 0; i < this.scene.models[n].vertices.length; i++) {
+        //                 // rotate
+        //     CG.mat3x3Rotate(this.models.slide1[0].rotate, this.models.slide1[0].theta);
+        //     // translate to the desired location
+        //     let tx_1 = this.models.slide1[0].center.values[0][0] + this.models.slide1[0].velocity[0] * delta_time/1000;
+        //     let ty_1 = this.models.slide1[0].center.values[1][0] + this.models.slide1[0].velocity[1] * delta_time/1000;
+        //     let tz_1 = this.models.slide1[0].center.values[1][0] + this.models.slide1[0].velocity[1] * delta_time/1000;
 
 
-            CG.mat3x3Translate(this.models.slide1[0].translate, tx_1, ty_1);
+        //     CG.mat3x3Translate(this.models.slide1[0].translate, tx_1, ty_1);
 
-            CG.mat3x3Rotate(this.models.slide1[1].rotate1, this.models.slide1[1].theta);
-            let tx_2 = this.models.slide1[1].center.values[0][0] + this.models.slide1[1].velocity[0] * delta_time/1000;
-            let ty_2 = this.models.slide1[1].center.values[1][0] + this.models.slide1[1].velocity[1] * delta_time/1000;
-            CG.mat3x3Translate(this.models.slide1[1].translate1, tx_2, ty_2);
+        //     CG.mat3x3Rotate(this.models.slide1[1].rotate1, this.models.slide1[1].theta);
+        //     let tx_2 = this.models.slide1[1].center.values[0][0] + this.models.slide1[1].velocity[0] * delta_time/1000;
+        //     let ty_2 = this.models.slide1[1].center.values[1][0] + this.models.slide1[1].velocity[1] * delta_time/1000;
+        //     CG.mat3x3Translate(this.models.slide1[1].translate1, tx_2, ty_2);
 
-            CG.mat3x3Rotate(this.models.slide1[2].rotate2, this.models.slide1[2].theta);
-            let tx_3 = this.models.slide1[2].center.values[0][0] + this.models.slide1[2].velocity[0] * delta_time/1000;
-            let ty_3 = this.models.slide1[2].center.values[1][0] + this.models.slide1[2].velocity[1] * delta_time/1000;
-            CG.mat3x3Translate(this.models.slide1[2].translate2, tx_3, ty_3);
-            }
-        }
+        //     CG.mat3x3Rotate(this.models.slide1[2].rotate2, this.models.slide1[2].theta);
+        //     let tx_3 = this.models.slide1[2].center.values[0][0] + this.models.slide1[2].velocity[0] * delta_time/1000;
+        //     let ty_3 = this.models.slide1[2].center.values[1][0] + this.models.slide1[2].velocity[1] * delta_time/1000;
+        //     CG.mat3x3Translate(this.models.slide1[2].translate2, tx_3, ty_3);
+        //     }
+        // }
 
     }
 
@@ -73,25 +73,33 @@ class Renderer {
     
     //
     moveLeft() {
-        let value = this.scene.view.prp.values[0][0] + 1;
+        let value = this.scene.view.srp.values[0][0] - 1;
+        this.scene.view.srp.values[0][0] = value;
+        value = this.scene.view.prp.values[0][0] - 1;
         this.scene.view.prp.values[0][0] = value;
     }
     
     //
     moveRight() {
-        let value = this.scene.view.prp.values[0][0] - 1;
+        let value = this.scene.view.srp.values[0][0] + 1;
+        this.scene.view.srp.values[0][0] = value;
+        value = this.scene.view.prp.values[0][0] + 1;
         this.scene.view.prp.values[0][0] = value;
     }
     
     //
     moveBackward() {
-        let value = this.scene.view.prp.values[2][0] + 1;
+        let value = this.scene.view.srp.values[2][0] + 1;
+        this.scene.view.srp.values[2][0] = value;
+        value = this.scene.view.prp.values[2][0] + 1;
         this.scene.view.prp.values[2][0] = value;
     }
     
     //
     moveForward() {
-        let value = this.scene.view.prp.values[2][0] - 1;
+        let value = this.scene.view.srp.values[2][0] - 1;
+        this.scene.view.srp.values[2][0] = value;
+        value = this.scene.view.prp.values[2][0] - 1;
         this.scene.view.prp.values[2][0] = value;
     }
 

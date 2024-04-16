@@ -96,7 +96,6 @@ class Renderer {
                 point.values = this.scene.models[n].vertices[i].data; //grab one vertex
                 point = Matrix.multiply([perspective_mat, point]); //multiply perspective matrix with vertex
 
-                //do clipping here
 
                 point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), point]); //project to 2D and translate/scale
 
@@ -106,9 +105,14 @@ class Renderer {
                 point.values[0][0] = x;
                 point.values[1][0] = y;
                 points[i] = point;
-            }
-
-            
+            }  
+  /////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
+        const points3 = {
+            point0: { x: 200, y: 0},
+            point1: { x: this.canvas.width+1, y: 500}
+        };
+        this.clipLinePerspective(points3, 1);     
+/////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
             //draw lines
             for(let i = 0; i < this.scene.models[n].edges.length; i++) {
                 let edge = this.scene.models[n].edges[i]; //gets one edge
@@ -116,6 +120,13 @@ class Renderer {
                 //draw edge
                 for(let j = 0; j < edge.length - 1; j++) {
                     this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
+/////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
+                    const points2 = {
+                        point0: { x: points[edge[j]].values[0], y: points[edge[j]].values[1] },
+                        point1: { x: points[edge[j + 1]].values[0], y: points[edge[j + 1]].values[1] }
+                    };
+                   this.clipLinePerspective(points2, 1);     
+/////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
                 }
             }
         }
@@ -153,15 +164,62 @@ class Renderer {
     // line:         object {pt0: Vector4, pt1: Vector4}
     // z_min:        float (near clipping plane in canonical view volume)
     clipLinePerspective(line, z_min) {
+       // this.drawLine(0,0,500,500);
+     //  this.drawLine(0, 0, 300, 300);
         let result = null;
-        let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z); 
-        let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
-        let out0 = this.outcodePerspective(p0, z_min);
-        let out1 = this.outcodePerspective(p1, z_min);
+        //let p0 = Vector3(line.pt0.x, line.pt0.y, line.pt0.z); 
+        // let p1 = Vector3(line.pt1.x, line.pt1.y, line.pt1.z);
+        // let out0 = this.outcodePerspective(p0, z_min);
+        // let out1 = this.outcodePerspective(p1, z_min);
         
         // TODO: implement clipping here!
-        
-        return result;
+
+    //BOTTOM
+        //need to check if the line passes through the bottom of the window y < ymin **(Outcode 0100)**
+        if(line.point1.y < 0 || line.point0.y < 0){
+
+            let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+
+            //need to calculate where line crosses x-axis (where y=0)
+            let x_intercept = line.point0.x - (line.point0.y/m);
+            
+            this.drawLine(line.point0.x,line.point0.y, x_intercept, 0);
+        }
+
+    //TOP  
+        //need to check if the line passes through the top of the window y > ymin **(Outcode 1000)**
+        if(line.point1.y > this.canvas.height || line.point0.y > this.canvas.height){
+
+            let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+
+            //need to calculate where line crosses x-axis (where y=canvas height)
+            let x_intercept = line.point0.x - ((line.point0.y - this.canvas.height)/m);
+
+            this.drawLine(line.point0.x,line.point0.y, x_intercept, this.canvas.height);
+        }
+
+    //LEFT
+        //need to check if the line passes through the left of the window x < 0 **(Outcode 0001)**
+        if(line.point1.x < 0 || line.point0.x < 0){
+            let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+
+            //need to calculate where line crosses y-axis (where x=0)
+            let y_intercept = line.point0.y -(line.point0.x * m);
+            
+            this.drawLine(line.point0.x,line.point0.y, 0, y_intercept);
+        }
+
+    //RIGHT
+        //need to check if the line passes through the right of the window x > xmax **(Outcode 0010)**
+        if(line.point1.x > this.canvas.width || line.point0.x > this.canvas.width){
+            let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+
+            //need to calculate where line crosses y-axis (where x=0)
+            let y_intercept = line.point0.y + m * (this.canvas.width - line.point0.x);
+            
+            this.drawLine(line.point0.x, line.point0.y, this.canvas.width, y_intercept);
+        }
+
     }
 
     //

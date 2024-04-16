@@ -22,7 +22,7 @@ class Renderer {
         this.start_time = null;
         this.prev_time = null;
     }
-
+ 
     //
     updateTransforms(time, delta_time) {
         // TODO: update any transformations needed for animation

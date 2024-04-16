@@ -30,7 +30,6 @@ class Renderer {
 
     //
     rotateLeft() {
-        console.log(this.scene.view.srp.values[0][0]);
         let value = this.scene.view.srp.values[0][0] - 1;
         this.scene.view.srp.values[0][0] = value;
     }
@@ -43,25 +42,33 @@ class Renderer {
     
     //
     moveLeft() {
-        let value = this.scene.view.prp.values[0][0] + 1;
+        let value = this.scene.view.srp.values[0][0] - 1;
+        this.scene.view.srp.values[0][0] = value;
+        value = this.scene.view.prp.values[0][0] - 1;
         this.scene.view.prp.values[0][0] = value;
     }
     
     //
     moveRight() {
-        let value = this.scene.view.prp.values[0][0] - 1;
+        let value = this.scene.view.srp.values[0][0] + 1;
+        this.scene.view.srp.values[0][0] = value;
+        value = this.scene.view.prp.values[0][0] + 1;
         this.scene.view.prp.values[0][0] = value;
     }
     
     //
     moveBackward() {
-        let value = this.scene.view.prp.values[2][0] + 1;
+        let value = this.scene.view.srp.values[2][0] + 1;
+        this.scene.view.srp.values[2][0] = value;
+        value = this.scene.view.prp.values[2][0] + 1;
         this.scene.view.prp.values[2][0] = value;
     }
     
     //
     moveForward() {
-        let value = this.scene.view.prp.values[2][0] - 1;
+        let value = this.scene.view.srp.values[2][0] - 1;
+        this.scene.view.srp.values[2][0] = value;
+        value = this.scene.view.prp.values[2][0] - 1;
         this.scene.view.prp.values[2][0] = value;
     }
 

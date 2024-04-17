@@ -126,8 +126,6 @@ class Renderer {
                 let point = new Vector(4);
                 point.values = this.scene.models[n].vertices[i].data; //grab one vertex
                 point = Matrix.multiply([perspective_mat, point]); //multiply perspective matrix with vertex
-
-
                 point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), point]); //project to 2D and translate/scale
 
                 //convert to cartesian coords
@@ -137,10 +135,10 @@ class Renderer {
                 point.values[1][0] = y;
                 points[i] = point;
             }  
-        const points3 = {
-            point0: { x: 200, y: 0},
-            point1: { x: this.canvas.width+1, y: 500}
-        };
+        // const points3 = {
+        //     point0: { x: 200, y: 0},
+        //     point1: { x: this.canvas.width+1, y: 500}
+        // };
       //  this.clipLinePerspective(points3, 1);     
   /////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
         // const points3 = {
@@ -152,15 +150,16 @@ class Renderer {
             //draw lines
             for(let i = 0; i < this.scene.models[n].edges.length; i++) {
                 let edge = this.scene.models[n].edges[i]; //gets one edge
-                
                 //draw edge
                 for(let j = 0; j < edge.length - 1; j++) {
+                    //do clipping here
+                    // make points the line and clip zmin = -near/far (4 is near 5 is far (indices))
                     this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
-                    const points2 = {
-                        point0: { x: points[edge[j]].values[0], y: points[edge[j]].values[1] },
-                        point1: { x: points[edge[j + 1]].values[0], y: points[edge[j + 1]].values[1] }
-                    };
-                  this.clipLinePerspective(points2, 1);     
+                //     const points2 = {
+                //         point0: { x: points[edge[j]].values[0], y: points[edge[j]].values[1] },
+                //         point1: { x: points[edge[j + 1]].values[0], y: points[edge[j + 1]].values[1] }
+                //     };
+                //   this.clipLinePerspective(points2, 1);     
                 }
             }
         }
@@ -253,6 +252,18 @@ class Renderer {
             
             this.drawLine(line.point0.x, line.point0.y, this.canvas.width, y_intercept);
         }
+
+        
+    //Z-AXIS
+        //need to check if the line passes through the right of the window x > xmax **(Outcode 0010)**
+        if(line.point1.z > this.canvas.z_min){ //this might be line.point1.z < this.canvas.z_min
+            // let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+
+            // //need to calculate where line crosses y-axis (where x=0)
+            // let y_intercept = line.point0.y + m * (this.canvas.width - line.point0.x);
+            
+            // this.drawLine(line.point0.x, line.point0.y, this.canvas.width, y_intercept);
+        } 
 
     }
 

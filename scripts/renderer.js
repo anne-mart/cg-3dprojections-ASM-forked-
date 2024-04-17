@@ -26,6 +26,37 @@ class Renderer {
     updateTransforms(time, delta_time) { //NOT DONE/////////////////////////
         // TODO: update any transformations needed for animation
 
+        for(let i = 0; i < this.scene.models.length; i++) {
+            if(this.scene.models[i].hasOwnProperty('animation')) {
+                let axis = this.scene.models[i].animation.axis;
+                let rps = this.scene.models[i].animation.rps;
+                let trans1 = new Matrix(4, 4);
+                trans1 = CG.mat4x4Translate(trans1, this.scene.models[i].center[0] * -1, this.scene.models[i].center[1] * -1, this.scene.models[i].center[2] * -1);
+                let trans2 = new Matrix(4, 4);
+                trans2 = CG.mat4x4Translate(trans2, this.scene.models[i].center[0], this.scene.models[i].center[1], this.scene.models[i].center[2]);
+                let rotate = new Matrix(4, 4);
+
+                if(axis === 'y') {
+                    let angle = (360 * rps) * (delta_time / 1000);
+                    rotate = CG.mat4x4RotateY(rotate, angle * Math.PI / 180);
+                } else if (axis === 'x') {
+                    let angle = (360 * rps) * (delta_time / 1000);
+                    rotate = CG.mat4x4RotateX(rotate, angle * Math.PI / 180);
+                } else if (axis === 'z') {
+                    let angle = (360 * rps) * (delta_time / 1000);
+                    rotate = CG.mat4x4RotateZ(rotate, angle * Math.PI / 180);
+                }
+                //console.log(this.scene.models[i].vertices[0]);
+                for(let j = 0; j < this.scene.models[i].vertices.length; j++) {
+                    let point = new Vector(4);
+                    point.values = this.scene.models[i].vertices[j].data; 
+                    point = Matrix.multiply([trans2, rotate, trans1, point]);
+                    this.scene.models[i].vertices[j].data = point.values;
+                }
+            }
+            
+        }
+
         // for(let n = 0; n < this.scene.models.length; n++) {
         //     for(let i = 0; i < this.scene.models[n].vertices.length; i++) {
         //                 // rotate
@@ -322,6 +353,7 @@ class Renderer {
                 if (model.type === 'cube') {
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = JSON.parse(JSON.stringify(scene.models[i].center));
                     let x = JSON.parse(JSON.stringify(scene.models[i].width));
                     let y = JSON.parse(JSON.stringify(scene.models[i].height));
@@ -351,6 +383,7 @@ class Renderer {
                     let angle = 360 / num_edges;
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = scene.models[i].center;
                     let r = scene.models[i].radius;
                     let y = scene.models[i].height;
@@ -391,6 +424,7 @@ class Renderer {
                     let angle = 360 / num_edges;
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = scene.models[i].center;
                     let r = scene.models[i].radius;
                     let y = scene.models[i].height;
@@ -425,6 +459,7 @@ class Renderer {
                     let sphere_angle = 360 / slices;
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = scene.models[i].center;
                     let r = scene.models[i].radius;
 

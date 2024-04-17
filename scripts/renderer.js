@@ -26,6 +26,37 @@ class Renderer {
     updateTransforms(time, delta_time) { //NOT DONE/////////////////////////
         // TODO: update any transformations needed for animation
 
+        for(let i = 0; i < this.scene.models.length; i++) {
+            if(this.scene.models[i].hasOwnProperty('animation')) {
+                let axis = this.scene.models[i].animation.axis;
+                let rps = this.scene.models[i].animation.rps;
+                let trans1 = new Matrix(4, 4);
+                trans1 = CG.mat4x4Translate(trans1, this.scene.models[i].center[0] * -1, this.scene.models[i].center[1] * -1, this.scene.models[i].center[2] * -1);
+                let trans2 = new Matrix(4, 4);
+                trans2 = CG.mat4x4Translate(trans2, this.scene.models[i].center[0], this.scene.models[i].center[1], this.scene.models[i].center[2]);
+                let rotate = new Matrix(4, 4);
+
+                if(axis === 'y') {
+                    let angle = (360 * rps) * (delta_time / 1000);
+                    rotate = CG.mat4x4RotateY(rotate, angle * Math.PI / 180);
+                } else if (axis === 'x') {
+                    let angle = (360 * rps) * (delta_time / 1000);
+                    rotate = CG.mat4x4RotateX(rotate, angle * Math.PI / 180);
+                } else if (axis === 'z') {
+                    let angle = (360 * rps) * (delta_time / 1000);
+                    rotate = CG.mat4x4RotateZ(rotate, angle * Math.PI / 180);
+                }
+                //console.log(this.scene.models[i].vertices[0]);
+                for(let j = 0; j < this.scene.models[i].vertices.length; j++) {
+                    let point = new Vector(4);
+                    point.values = this.scene.models[i].vertices[j].data; 
+                    point = Matrix.multiply([trans2, rotate, trans1, point]);
+                    this.scene.models[i].vertices[j].data = point.values;
+                }
+            }
+            
+        }
+
         // for(let n = 0; n < this.scene.models.length; n++) {
         //     for(let i = 0; i < this.scene.models[n].vertices.length; i++) {
         //                 // rotate
@@ -126,6 +157,8 @@ class Renderer {
                 let point = new Vector(4);
                 point.values = this.scene.models[n].vertices[i].data; //grab one vertex
                 point = Matrix.multiply([perspective_mat, point]); //multiply perspective matrix with vertex
+
+
                 point = Matrix.multiply([veiw_mat, CG.mat4x4MPer(), point]); //project to 2D and translate/scale
 
                 //convert to cartesian coords
@@ -135,10 +168,10 @@ class Renderer {
                 point.values[1][0] = y;
                 points[i] = point;
             }  
-        // const points3 = {
-        //     point0: { x: 200, y: 0},
-        //     point1: { x: this.canvas.width+1, y: 500}
-        // };
+        const points3 = {
+            point0: { x: 200, y: 0},
+            point1: { x: this.canvas.width+1, y: 500}
+        };
       //  this.clipLinePerspective(points3, 1);     
   /////////////////////////////////////////////////////////////////////////////////////////////////// ANNE
         // const points3 = {
@@ -150,16 +183,15 @@ class Renderer {
             //draw lines
             for(let i = 0; i < this.scene.models[n].edges.length; i++) {
                 let edge = this.scene.models[n].edges[i]; //gets one edge
+                
                 //draw edge
                 for(let j = 0; j < edge.length - 1; j++) {
-                    //do clipping here
-                    // make points the line and clip zmin = -near/far (4 is near 5 is far (indices))
-                    this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
-                //     const points2 = {
-                //         point0: { x: points[edge[j]].values[0], y: points[edge[j]].values[1] },
-                //         point1: { x: points[edge[j + 1]].values[0], y: points[edge[j + 1]].values[1] }
-                //     };
-                //   this.clipLinePerspective(points2, 1);     
+                   this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
+                    const points2 = {
+                        point0: { x: points[edge[j]].values[0], y: points[edge[j]].values[1] },
+                        point1: { x: points[edge[j + 1]].values[0], y: points[edge[j + 1]].values[1] }
+                    };
+                  this.clipLinePerspective(points2, 1);     
                 }
             }
         }
@@ -253,17 +285,19 @@ class Renderer {
             this.drawLine(line.point0.x, line.point0.y, this.canvas.width, y_intercept);
         }
 
-        
     //Z-AXIS
-        //need to check if the line passes through the right of the window x > xmax **(Outcode 0010)**
-        if(line.point1.z > this.canvas.z_min){ //this might be line.point1.z < this.canvas.z_min
-            // let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+        //front in z_min, back is -1
+        if(line.point1.z > z_min|| line.point0.z < -1){
+            let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
 
-            // //need to calculate where line crosses y-axis (where x=0)
-            // let y_intercept = line.point0.y + m * (this.canvas.width - line.point0.x);
-            
-            // this.drawLine(line.point0.x, line.point0.y, this.canvas.width, y_intercept);
-        } 
+            //z_min = near / far
+            let z_intercept = line.point0.z + m * (line.point1.z - line.point0.z);
+
+            // near = z_max == 1
+            //far = z_min
+
+            this.drawLine(line.point0.x, line.point0.y, line.point0.z, z_intercept);
+        }
 
     }
 
@@ -333,6 +367,7 @@ class Renderer {
                 if (model.type === 'cube') {
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = JSON.parse(JSON.stringify(scene.models[i].center));
                     let x = JSON.parse(JSON.stringify(scene.models[i].width));
                     let y = JSON.parse(JSON.stringify(scene.models[i].height));
@@ -362,6 +397,7 @@ class Renderer {
                     let angle = 360 / num_edges;
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = scene.models[i].center;
                     let r = scene.models[i].radius;
                     let y = scene.models[i].height;
@@ -402,6 +438,7 @@ class Renderer {
                     let angle = 360 / num_edges;
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = scene.models[i].center;
                     let r = scene.models[i].radius;
                     let y = scene.models[i].height;
@@ -436,6 +473,7 @@ class Renderer {
                     let sphere_angle = 360 / slices;
                     model.vertices = [];
                     model.edges = [];
+                    model.center = scene.models[i].center;
                     let center = scene.models[i].center;
                     let r = scene.models[i].radius;
 

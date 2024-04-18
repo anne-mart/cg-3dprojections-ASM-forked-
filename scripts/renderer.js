@@ -186,7 +186,7 @@ class Renderer {
                 
                 //draw edge
                 for(let j = 0; j < edge.length - 1; j++) {
-                    this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
+                   this.drawLine(points[edge[j]].values[0], points[edge[j]].values[1], points[edge[j + 1]].values[0], points[edge[j + 1]].values[1]);
                     const points2 = {
                         point0: { x: points[edge[j]].values[0], y: points[edge[j]].values[1] },
                         point1: { x: points[edge[j + 1]].values[0], y: points[edge[j + 1]].values[1] }
@@ -283,6 +283,20 @@ class Renderer {
             let y_intercept = line.point0.y + m * (this.canvas.width - line.point0.x);
             
             this.drawLine(line.point0.x, line.point0.y, this.canvas.width, y_intercept);
+        }
+
+    //Z-AXIS
+        //front in z_min, back is -1
+        if(line.point1.z > z_min|| line.point0.z < -1){
+            let m = (line.point1.y-line.point0.y)/(line.point1.x-line.point0.x); //m=(y2-y1)/(x2-x1)
+
+            //z_min = near / far
+            let z_intercept = line.point0.z + m * (line.point1.z - line.point0.z);
+
+            // near = z_max == 1
+            //far = z_min
+
+            this.drawLine(line.point0.x, line.point0.y, line.point0.z, z_intercept);
         }
 
     }

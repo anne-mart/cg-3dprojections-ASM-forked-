@@ -27,7 +27,7 @@ class Renderer {
         // TODO: update any transformations needed for animation
 
         for(let i = 0; i < this.scene.models.length; i++) {
-            if(this.scene.models[i].hasOwnProperty('animation')) {
+            if(this.scene.models[i].hasOwnProperty('animation')) {  
                 let axis = this.scene.models[i].animation.axis;
                 let rps = this.scene.models[i].animation.rps;
                 let trans1 = new Matrix(4, 4);
